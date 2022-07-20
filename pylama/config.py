@@ -16,7 +16,8 @@ from pylama.lint import LINTERS
 DEFAULT_LINTERS = "pycodestyle", "pyflakes", "mccabe"
 
 CURDIR = Path.cwd()
-HOMECFG = Path.home() / ".pylama.ini"
+HOMEDIR = Path.home()
+HOMECFG = HOMEDIR / ".pylama.ini"
 CONFIG_FILES = "pylama.ini", "setup.cfg", "tox.ini", "pytest.ini"
 
 # Setup a logger
@@ -62,10 +63,13 @@ def get_default_config_file(rootdir: Path = None) -> Optional[str]:
     if rootdir is None:
         return DEFAULT_CONFIG_FILE
 
-    for filename in CONFIG_FILES:
-        path = rootdir / filename
-        if path.is_file() and os.access(path, os.R_OK):
-            return path.as_posix()
+    while HOMEDIR in rootdir.parents:
+        for filename in CONFIG_FILES:
+            path = rootdir / filename
+            if path.is_file() and os.access(path, os.R_OK):
+                return path.as_posix()
+        rootdir = rootdir.parent
+
 
     return None
 
